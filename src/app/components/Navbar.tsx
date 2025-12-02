@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
+import Link from "next/link";
 
 const Navbar = () => {
     const { scrollY } = useScroll();
@@ -22,6 +23,7 @@ const Navbar = () => {
                 <Image src={"/logo.svg"} width={30} height={30} alt="logo" className="w-6 h-6 md:w-8 md:h-8" />
                 <span className="text-lg md:text-xl font-bold text-gray-900">Reppoo</span>
             </motion.div>
+            <Link href={'/login'}>
             <motion.button
                 className="text-sm md:text-base text-gray-700 hover:text-gray-900 font-semibold cursor-pointer transition-colors"
                 whileHover={{ scale: 1.05 }}
@@ -29,9 +31,10 @@ const Navbar = () => {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-            >
+                >
                 Admin login
             </motion.button>
+                </Link>
         </motion.header>
     );
 };
