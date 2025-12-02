@@ -11,7 +11,6 @@ const Landing = () => {
     const [isPaused, setIsPaused] = useState(false);
     const [current, setCurrent] = useState(0);
 
-    // Framer Motion controls
     const { scrollY } = useScroll();
     const y = useTransform(scrollY, [0, 300], [0, 100]);
 
@@ -82,7 +81,6 @@ const Landing = () => {
         return () => clearInterval(interval);
     }, [isPaused, goNext]);
 
-    // Stagger animations for logo grid
     const logoContainerVariants = {
         hidden: { opacity: 0 },
         visible: {
