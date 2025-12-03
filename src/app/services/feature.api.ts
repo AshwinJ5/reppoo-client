@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/feature`;
 
 const authHeader = () => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
 
     return {
         headers: {
