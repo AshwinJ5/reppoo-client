@@ -1,6 +1,7 @@
 "use client";
+
 import AdminSidebar from "@/app/components/AdminSidebar";
-import { Camera, Trash } from "lucide-react";
+import { ArrowLeft, Camera, Trash } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,6 +9,7 @@ import { AppDispatch, RootState } from "@/app/store/store";
 import { fetchSingleTestimonial, updateTestimonial, TestimonialItem } from "@/app/store/testimonialSlice";
 import { useRouter, useParams } from "next/navigation";
 import toast from "react-hot-toast";
+import Link from "next/link";
 
 interface TestimonialFormData {
     comment: string;
@@ -36,10 +38,9 @@ const TestimonialEditPage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    /* ---------------- FETCH DATA ---------------- */
     useEffect(() => {
-        if (testimonialId) {
-            dispatch(fetchSingleTestimonial(testimonialId as string));
-        }
+        if (testimonialId) dispatch(fetchSingleTestimonial(testimonialId as string));
     }, [testimonialId, dispatch]);
 
     useEffect(() => {
@@ -54,283 +55,217 @@ const TestimonialEditPage = () => {
                     image: null,
                     existingImage: testimonialData.file,
                 });
+
                 setPreviewUrl(`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/testimonials/${testimonialData.file}`);
             }
-        } else if (list.length === 0 && testimonialId) {
-            const fetchTestimonial = async () => {
-                try {
-                    await dispatch(fetchSingleTestimonial(testimonialId as string)).unwrap();
-                } catch (error) {
-                    toast.error("Failed to fetch testimonial");
-                    router.push("/admins/testimonial");
-                }
-            };
-            fetchTestimonial();
         }
-    }, [testimonialId, list, dispatch, router]);
+    }, [testimonialId, list]);
 
+    /* ---------------- INPUT HANDLERS ---------------- */
     const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { id, value } = e.target;
-        setTestimonial((prev) => ({
-            ...prev,
-            [id]: value,
-        }));
+        setTestimonial((prev) => ({ ...prev, [id]: value }));
     };
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                toast.error("File size should be less than 2MB");
-                return;
-            }
+            if (file.size > 2 * 1024 * 1024) return toast.error("File must be < 2MB");
+            if (!file.type.startsWith("image/")) return toast.error("Invalid file");
 
-            if (!file.type.startsWith("image/")) {
-                toast.error("Please select an image file");
-                return;
-            }
-
-            setTestimonial((prev) => ({
-                ...prev,
-                image: file,
-                existingImage: "",
-            }));
+            setTestimonial((prev) => ({ ...prev, image: file, existingImage: "" }));
 
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewUrl(reader.result as string);
-            };
+            reader.onloadend = () => setPreviewUrl(reader.result as string);
             reader.readAsDataURL(file);
         }
     };
 
     const handleDeleteImage = () => {
-        setTestimonial((prev) => ({
-            ...prev,
-            file: null,
-            existingImage: "",
-        }));
         setPreviewUrl("");
-
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
-    };
-
-    const handleChangeImage = () => {
-        fileInputRef.current?.click();
+        setTestimonial((prev) => ({ ...prev, image: null, existingImage: "" }));
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     const handleSave = async () => {
         if (!testimonial.comment.trim() || !testimonial.name.trim()) {
-            toast.error("Comment and name are required");
+            toast.error("Comment & name required");
             return;
         }
 
         setIsSubmitting(true);
-
         try {
             const formData = new FormData();
             formData.append("comment", testimonial.comment);
             formData.append("name", testimonial.name);
             formData.append("designation", testimonial.designation);
             formData.append("company", testimonial.company);
+            if (testimonial.image) formData.append("image", testimonial.image);
 
-            if (testimonial.image) {
-                formData.append("image", testimonial.image);
-            }
-
-            await dispatch(
-                updateTestimonial({
-                    id: testimonialId as string,
-                    formData,
-                })
-            ).unwrap();
-
-            toast.success("Testimonial updated successfully!");
+            await dispatch(updateTestimonial({ id: testimonialId as string, formData })).unwrap();
+            toast.success("Updated successfully!");
             router.push("/admins/testimonial");
         } catch (error: any) {
-            console.error("Update error:", error);
-            toast.error(error?.message || "Failed to update testimonial");
+            toast.error(error?.message || "Failed to update");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleCancel = () => {
-        router.push("/admins/testimonial");
-    };
-
-    if (loading && !testimonial.comment) {
-        return (
-            <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 font-sans">
-                <div className="flex">
-                    <AdminSidebar />
-                    <main className="flex-1 p-8">
-                        <div className="max-w-6xl mx-auto">
-                            <div className="flex items-center justify-center h-64">
-                                <div className="text-slate-600">Loading testimonial...</div>
-                            </div>
-                        </div>
-                    </main>
-                </div>
-            </div>
-        );
-    }
+    const handleCancel = () => router.push("/admins/testimonial");
 
     return (
         <div className="min-h-screen bg-linear-to-br from-gray-50 to-blue-50 font-sans">
-            <div className="flex">
+            <div className="lg:flex">
                 <AdminSidebar />
 
-                <main className="flex-1 p-8">
+                <main className="flex-1 p-4 md:p-8">
                     <div className="max-w-6xl mx-auto">
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-bold leading-tight tracking-tight text-slate-800">
+                      <div className="flex items-center gap-3 mb-6 md:mb-8">
+                            <Link
+                                href="/admins/testimonial"
+                                className="flex items-center justify-center w-10 h-10 rounded-xl border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </Link>
+                            <div>
+                                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-800">
                                 Edit Testimonial
                             </h1>
-                            <p className="text-slate-600 mt-2">Update the details for the testimonial below.</p>
+                            <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">
+                                Update testimonial details below.
+                            </p>
+                            </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
                             <div className="lg:col-span-2 flex flex-col gap-6">
-                                <div className="bg-white rounded-2xl shadow-lg p-6 border border-slate-200">
-                                    <div className="flex flex-col gap-3">
-                                        <label className="text-sm font-semibold text-slate-700" htmlFor="comment">
-                                            Comment <span className="text-red-500">*</span>
-                                        </label>
+                                <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border border-slate-200">
+                                    <div className="flex flex-col gap-2">
+                                        <label className="text-sm font-semibold">Comment *</label>
                                         <textarea
-                                            className="w-full resize-none rounded-xl text-slate-800 border-2 border-slate-200 bg-slate-50 p-4 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 placeholder:text-slate-400 transition-all duration-200"
+                                            rows={5}
                                             id="comment"
-                                            placeholder="Share your testimonial experience..."
-                                            rows={6}
                                             value={testimonial.comment}
                                             onChange={handleInputChange}
                                             disabled={isSubmitting}
+                                            placeholder="Write testimonial..."
+                                            className="w-full rounded-xl border px-4 py-3 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                         />
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                                        <div className="flex flex-col gap-3">
-                                            <label className="text-sm font-semibold text-slate-700" htmlFor="name">
-                                                Name <span className="text-red-500">*</span>
-                                            </label>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold">Name *</label>
                                             <input
-                                                className="w-full rounded-xl text-slate-800 border-2 border-slate-200 bg-slate-50 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 placeholder:text-slate-400 transition-all duration-200"
                                                 id="name"
-                                                placeholder="e.g., Jane Doe"
                                                 type="text"
                                                 value={testimonial.name}
                                                 onChange={handleInputChange}
                                                 disabled={isSubmitting}
+                                                placeholder="Person's name"
+                                                className="rounded-xl border px-4 py-3 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                             />
                                         </div>
 
-                                        <div className="flex flex-col gap-3">
-                                            <label className="text-sm font-semibold text-slate-700" htmlFor="designation">
-                                                Designation <span className="text-red-500">*</span>
-                                            </label>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-sm font-semibold">Designation *</label>
                                             <input
-                                                className="w-full rounded-xl text-slate-800 border-2 border-slate-200 bg-slate-50 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 placeholder:text-slate-400 transition-all duration-200"
                                                 id="designation"
-                                                placeholder="e.g., CEO"
                                                 type="text"
                                                 value={testimonial.designation}
                                                 onChange={handleInputChange}
                                                 disabled={isSubmitting}
+                                                placeholder="Role (e.g., CEO)"
+                                                className="rounded-xl border px-4 py-3 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-3 mt-6">
-                                        <label className="text-sm font-semibold text-slate-700" htmlFor="company">
-                                            Company <span className="text-red-500">*</span>
-                                        </label>
+                                    <div className="flex flex-col gap-2 mt-4">
+                                        <label className="text-sm font-semibold">Company *</label>
                                         <input
-                                            className="w-full rounded-xl text-slate-800 border-2 border-slate-200 bg-slate-50 px-4 py-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 placeholder:text-slate-400 transition-all duration-200"
                                             id="company"
-                                            placeholder="e.g., Acme Inc."
                                             type="text"
                                             value={testimonial.company}
                                             onChange={handleInputChange}
                                             disabled={isSubmitting}
+                                            placeholder="Company name"
+                                            className="rounded-xl border px-4 py-3 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-3">
-                                <label className="text-sm font-semibold text-slate-700">{"Author's Image"}</label>
-                                <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-dashed border-slate-300 hover:border-blue-400 transition-all duration-300 text-center">
+                                <label className="text-sm font-semibold">Author Image</label>
+
+                                <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-2 border-dashed border-slate-300 hover:border-blue-400 transition">
                                     <input
-                                        type="file"
                                         ref={fileInputRef}
-                                        className="hidden"
+                                        type="file"
                                         accept="image/*"
+                                        className="hidden"
                                         onChange={handleFileChange}
                                         disabled={isSubmitting}
                                     />
 
                                     {previewUrl || testimonial.existingImage ? (
-                                        <div className="relative w-40 h-40 mx-auto mb-6 group">
-                                            <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-lg group-hover:blur-xl transition-all duration-300" />
-                                            <div className="relative w-full h-full">
-                                                <Image
-                                                    fill
-                                                    className="rounded-full object-cover border-4 border-white shadow-lg"
-                                                    src={previewUrl || testimonial.existingImage || "/logo.svg"}
-                                                    alt={`Profile picture of ${testimonial.name || "user"}`}
-                                                    sizes="160px"
-                                                />
-                                                <button
-                                                    className="absolute bottom-0 right-0 flex items-center justify-center w-10 h-10 bg-linear-to-br from-red-500 to-red-600 rounded-full text-white hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    onClick={handleDeleteImage}
-                                                    type="button"
-                                                    aria-label="Delete image"
-                                                    disabled={isSubmitting}
-                                                >
-                                                    <Trash size={18} />
-                                                </button>
-                                            </div>
+                                        <div className="relative w-32 h-32 sm:w-40 sm:h-40 mx-auto mb-4">
+                                            <Image
+                                                fill
+                                                src={
+                                                    previewUrl ||
+                                                    `${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/testimonials/${testimonial.existingImage}`
+                                                }
+                                                alt="Image"
+                                                className="object-cover rounded-full border-4 border-white shadow-lg"
+                                            />
+
+                                            <button
+                                                type="button"
+                                                onClick={handleDeleteImage}
+                                                disabled={isSubmitting}
+                                                className="absolute bottom-0 right-0 bg-red-600 text-white w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-md hover:bg-red-700"
+                                            >
+                                                <Trash size={16} />
+                                            </button>
                                         </div>
                                     ) : (
-                                        <div className="w-40 h-40 mx-auto mb-6 flex items-center justify-center rounded-full bg-linear-to-br from-slate-100 to-slate-200 border-4 border-dashed border-slate-300 hover:border-blue-400 transition-all duration-300">
-                                            <Camera size={48} className="text-slate-400" />
+                                        <div className="w-32 h-32 sm:w-40 sm:h-40 mx-auto flex items-center justify-center rounded-full bg-slate-100 border border-dashed border-slate-300 mb-4">
+                                            <Camera size={38} className="text-slate-400" />
                                         </div>
                                     )}
 
                                     <button
-                                        className="px-6 py-3 bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                                        onClick={handleChangeImage}
-                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
                                         disabled={isSubmitting}
+                                        type="button"
+                                        className="w-full py-3 rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow transition"
                                     >
                                         {previewUrl || testimonial.existingImage ? "Change Image" : "Upload Image"}
                                     </button>
-                                    <p className="text-xs text-slate-500 mt-4">Recommended: 200x200px, max 2MB.</p>
-                                    {testimonial.image && (
-                                        <p className="text-xs text-green-600 mt-2">
-                                            New image selected: {testimonial.image.name}
-                                        </p>
-                                    )}
+
+                                    <p className="text-xs text-slate-500 mt-2 text-center">
+                                        Recommended: 200x200px — Max 2MB
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-10 pt-8 border-t border-slate-200 flex justify-end gap-4">
+                        <div className="mt-8 pt-6 border-t border-slate-300 flex flex-col sm:flex-row justify-end gap-3">
                             <button
-                                className="px-6 py-3 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 border-2 border-slate-300 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                 onClick={handleCancel}
-                                type="button"
                                 disabled={isSubmitting}
+                                className="px-5 py-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 shadow-sm"
                             >
                                 Cancel
                             </button>
+
                             <button
-                                className="px-6 py-3 text-sm font-medium text-white bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                 onClick={handleSave}
-                                type="button"
                                 disabled={isSubmitting}
+                                className="px-6 py-3 rounded-xl text-white bg-blue-600 hover:bg-blue-700 shadow flex items-center gap-2 justify-center"
                             >
                                 {isSubmitting ? (
                                     <>
