@@ -6,6 +6,7 @@ import AdminSidebar from "@/app/components/AdminSidebar";
 import { Pen, Plus, Search, Trash } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/app/store/hooks";
 import { fetchTestimonials, deleteTestimonial, fetchSingleTestimonial } from "@/app/store/testimonialSlice";
+import Image from "next/image";
 
 type TestimonialItem = {
     _id: string;
@@ -190,12 +191,23 @@ const TestimonialListPage = () => {
                                                 <tr key={t._id} className="hover:bg-slate-50">
                                                     <td className="px-4 py-4">
                                                         <div className="flex items-center gap-3">
-                                                            <div
-                                                                className="w-12 h-12 rounded-full bg-cover bg-center border border-slate-200 shadow"
-                                                                style={{
-                                                                    backgroundImage: `url(${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/testimonials/${t.file})`,
-                                                                }}
-                                                            />
+                                                            <div className="relative w-14 h-14 rounded-full shadow border border-slate-200 overflow-hidden">
+                                                                <Image
+                                                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/testimonials/${t.file}`}
+                                                                    alt={`${t.name}'s testimonial`}
+                                                                    fill
+                                                                    className="object-cover"
+                                                                    sizes="56px"
+                                                                    loading="lazy"
+                                                                    quality={75}
+                                                                    placeholder="blur"
+                                                                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAADAAQDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                                                                    onError={(e) => {
+                                                                        // Fallback to a placeholder
+                                                                        e.currentTarget.style.display = "none";
+                                                                    }}
+                                                                />
+                                                            </div>
                                                             <div>
                                                                 <p className="font-medium text-slate-800">{t.name}</p>
                                                                 <p className="text-sm text-slate-600">{t.designation}</p>
@@ -246,12 +258,23 @@ const TestimonialListPage = () => {
                                         className="bg-white rounded-2xl shadow border border-slate-200 p-4 flex flex-col gap-3"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div
-                                                className="w-14 h-14 rounded-full bg-cover bg-center shadow border border-slate-200"
-                                                style={{
-                                                    backgroundImage: `url(${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/testimonials/${t.file})`,
-                                                }}
-                                            />
+                                            <div className="relative w-14 h-14 rounded-full shadow border border-slate-200 overflow-hidden">
+                                                <Image
+                                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/uploads/testimonials/${t.file}`}
+                                                    alt={`${t.name}'s testimonial`}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="56px"
+                                                    loading="lazy"
+                                                    quality={75}
+                                                    placeholder="blur"
+                                                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAADAAQDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
+                                                    onError={(e) => {
+                                                        // Fallback to a placeholder
+                                                        e.currentTarget.style.display = "none";
+                                                    }}
+                                                />
+                                            </div>
                                             <div>
                                                 <p className="font-semibold text-slate-800 text-lg">{t.name}</p>
                                                 <p className="text-slate-600 text-sm">{t.designation}</p>

@@ -204,6 +204,8 @@ const TestimonialAddPage = () => {
                                                 src={previewUrl}
                                                 className="rounded-full object-cover border-4 border-white shadow-lg"
                                                 alt="Preview"
+                                                loading="lazy"
+                                                priority={false}
                                             />
                                             <button
                                                 onClick={handleDeleteImage}

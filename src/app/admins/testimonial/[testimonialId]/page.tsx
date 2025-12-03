@@ -121,7 +121,7 @@ const TestimonialEditPage = () => {
 
                 <main className="flex-1 p-4 md:p-8">
                     <div className="max-w-6xl mx-auto">
-                      <div className="flex items-center gap-3 mb-6 md:mb-8">
+                        <div className="flex items-center gap-3 mb-6 md:mb-8">
                             <Link
                                 href="/admins/testimonial"
                                 className="flex items-center justify-center w-10 h-10 rounded-xl border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition"
@@ -129,12 +129,12 @@ const TestimonialEditPage = () => {
                                 <ArrowLeft className="w-5 h-5" />
                             </Link>
                             <div>
-                                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-800">
-                                Edit Testimonial
-                            </h1>
-                            <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">
-                                Update testimonial details below.
-                            </p>
+                                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-800">
+                                    Edit Testimonial
+                                </h1>
+                                <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">
+                                    Update testimonial details below.
+                                </p>
                             </div>
                         </div>
 
@@ -220,6 +220,8 @@ const TestimonialEditPage = () => {
                                                 }
                                                 alt="Image"
                                                 className="object-cover rounded-full border-4 border-white shadow-lg"
+                                                loading="lazy"
+                                                priority={false}
                                             />
 
                                             <button
