@@ -6,8 +6,11 @@ import Footer from "./Footer";
 import Faq from "./FAQ";
 import Testimonial from "./Testimonial";
 import Feature from "./Feature";
+import useWakeServer from "@/app/store/useWakeServer";
+import ServerWakeLoader from "@/app/components/ServerWakeLoader";
 
 const Landing = () => {
+    const waking = useWakeServer();
     const logoContainerVariants = {
         hidden: { opacity: 0 },
         visible: {
@@ -18,6 +21,10 @@ const Landing = () => {
             },
         },
     };
+
+    if (waking) {
+    return <ServerWakeLoader />;
+}
 
     return (
         <motion.div
