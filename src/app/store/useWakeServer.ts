@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 
 export default function useWakeServer() {
-    const [waking, setWaking] = useState(!sessionStorage.getItem("serverAwake"));
+    const [waking, setWaking] = useState(true);
 
     useEffect(() => {
-        if (sessionStorage.getItem("serverAwake")) {
+        const alreadyAwake = sessionStorage.getItem("serverAwake");
+
+        if (alreadyAwake) {
             setWaking(false);
             return;
         }
@@ -23,6 +25,7 @@ export default function useWakeServer() {
                     clearInterval(interval);
                 }
             } catch (err) {
+                console.log(err);
             }
         };
 
