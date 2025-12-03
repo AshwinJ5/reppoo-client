@@ -21,6 +21,7 @@ const AdminSidebar = () => {
     const navItems: NavItem[] = [
         { href: "/admins/testimonial", label: "Testimonials", icon: Star },
         { href: "/admins/faq", label: "FAQs", icon: MessageCircle },
+        { href: "/admins/about", label: "About", icon: MessageCircle },
     ];
 
     const isActive = (href: string) => {
